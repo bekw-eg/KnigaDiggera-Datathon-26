@@ -77,7 +77,8 @@ if __name__ == "__main__":  # обязательно в самостоятель
 worker должен разрешать создание дочернего процесса (не daemon multiprocessing).
 Не запускайте задания при импорте модуля. Процесс-supervisor ограничивает wall-clock
 время; при зависании декодера/SDK прекращает дочерний процесс и возвращает последний
-checkpoint. Завершение процесса может добавить до примерно 2 секунд к лимиту.
+checkpoint. На остановку worker заранее резервируется `worker_shutdown_reserve_sec`
+(по умолчанию 2 секунды, для коротких лимитов не более 10% бюджета).
 Это механизм остановки, а не обещание закончить анализ любого видео за 300 секунд.
 Закрытие клиента не гарантирует мгновенную остановку внутренних вычислений Ollama.
 
@@ -89,6 +90,23 @@ time_base и source_time_sec. Backend отвечает за доступ к фа
 удаление каталога `result.output_dir` после завершения работы всех потребителей.
 
 ## Конфигурация и интерпретация
+
+Двухпроходный режим включается отдельным профилем:
+
+```powershell
+python -m scripts.test_vision "D:\local-videos\sample.mov" --config configs/vision.temporal.example.json --roi configs/camera.local.json --camera-profile camera-01 --report artifacts/temporal-report.json
+python -m scripts.benchmark_temporal --synthetic --no-vlm
+python -m scripts.benchmark_temporal --synthetic --report artifacts/temporal-ollama-benchmark-report.json
+```
+
+Замените путь MOV и профиль камеры своими значениями. `configs/vision.temporal.example.json`
+содержит 2 FPS → короткие motion proposals → дедупликацию ROI → 8 FPS → измеренные
+before/during/after → до трёх кадров в Qwen (`num_ctx=4096`, `num_predict=200`) →
+ReflectionGuard. По умолчанию старый `VisionConfig()` остаётся single-frame.
+Непрерывное движение получает ограниченные окна с диагностикой недостаточной
+сегментации. `CandidateEvent` не меняется; данные для UI находятся в `event_replay`.
+Настройка Desk/границы, поля Replay, статусы и ограничения описаны в
+[temporal guide](docs/temporal.md); измеренное сравнение — в [benchmark](docs/benchmark.md).
 
 - Начальный профиль: 2 FPS, 300 секунд, максимум 1200 sampled frames, 24 кандидата,
   6 VLM-попыток, 1 изображение на запрос, `num_ctx=2048`, `num_predict=200`, temperature 0.
@@ -277,6 +295,7 @@ app/
   vision/
     video.py roi.py motion.py detector.py reflection.py vlm.py
     config.py result.py pipeline.py
+    desk.py temporal.py evidence.py temporal_pipeline.py
   api/ core/ ui/           # только точки расширения участника №1
   rules/                   # только точка расширения участника №3
 configs/                   # пример профиля и неактивная demo ROI

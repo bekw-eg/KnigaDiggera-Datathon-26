@@ -41,7 +41,7 @@ uses time thresholds, not frame index. Stream duration/FPS may be unavailable;
 container/audio duration is not silently substituted for video duration. Decode
 exhaustion is the authoritative complete flag.
 
-Sampling is single-pass and streaming. Pixels for only one decoded sample are
+Legacy sampling is single-pass and streaming. Pixels for only one decoded sample are
 kept during motion analysis; bounded JPEG paths, motion hits and timestamps remain
 in memory. Local JPEG storage is bounded by max_sampled_frames per job, not a
 global disk quota. Backend must implement retention/quota. Source/video rotation
@@ -86,8 +86,10 @@ max_vlm_calls and error diagnostics cause partial state and unknown observations
 A successful scan without motion emits no candidates and does not need Ollama.
 
 The public supervisor uses Windows spawn, receives bounded checkpoints and
-terminates a worker at the wall-clock deadline, including native decoder/SDK
-stalls. Up to about two seconds of cleanup can follow. Checkpoints are not
+terminates a worker before the wall-clock deadline, including native decoder/SDK
+stalls. A configurable shutdown reserve (default 2 s, capped at 10% for short jobs)
+is subtracted from useful worker time and used for terminate/kill/join. Process
+startup and cleanup are included in total_sec. Checkpoints are not
 database persistence. A backend worker must allow child processes; avoid a daemon
 multiprocessing pool. If using async API, schedule in the participant 1 worker,
 not directly on the event loop. Coordinate a global job queue for production.
@@ -126,6 +128,39 @@ explicit overwrite, or create-if-absent via hard link. Filesystems without this
 operation fail visibly and preserve existing output. No sensitive media or source
 filenames are stored in calibration JSON. Real calibration and GUI desktop usability
 must be checked on the actual local camera; synthetic tests cannot establish them.
+
+## Compatible temporal extension (participant 2)
+
+`app/schemas.py` is unchanged. The approved implementation surface is the ML result
+envelope and a separate typed EventReplay sidecar, not a shared contract proposal.
+`TemporalConfig.enabled` defaults false. The opt-in profile preserves the local
+client, inference lock, ReflectionGuard and public supervised entry point.
+
+Desk masks intersect existing camera-specific polygons; missing calibration gives
+an explicit fallback and cannot establish object transfer. Hysteresis on the full
+score series and measured local peaks proposes bounded windows. Long unseparated
+activity is marked undersegmented. Deduplication preserves ROI provenance and
+configurable priority. A second sequential PTS-validated pass samples selected
+windows more densely, resegments, and selects observed quiet-before/peak/quiet-after
+frames. Distinct fingerprints and increasing PTS are required for complete triplets.
+
+EventReplay contains event linkage, all source ROI IDs, technical status, full-frame
+JPEG/PTS/role records, crop polygon/context/size mapping, sent VLM paths and sanitized
+tri-state observations. Additional temporal observation keys use the existing open
+observations dictionary. No verdict, identity tracking or normative references are
+added. Invalid temporal JSON/truncation is an error. Incomplete evidence uses a
+single-frame fallback with transfer unknown. `verified` in replay only means a valid
+technical triplet response. Strict consumers of an older VisionAnalysisResult schema
+must accept its new optional/defaulted sidecar and metrics; CandidateEvent consumers
+continue to validate the unchanged schema.
+
+Raw decode counts are bounded across both passes. The first pass retains only scores;
+refinement saves a bounded number of JPEGs, with pixels for one current frame in RAM.
+Sequential re-decoding avoids unverified seek/origin behavior, but can exhaust the
+budget on long inputs. Coverage separates overview, refined windows and proposals
+with successful model responses; it is never action recall. See [temporal guide](temporal.md)
+for parameters, replay fields, sampling gaps, diagnostics and PowerShell commands.
+Implementation is stacked on PR #2 (`feature/roi-calibration`), which depends on PR #1.
 
 ## References used for implementation
 
