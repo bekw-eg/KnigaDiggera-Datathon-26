@@ -40,6 +40,13 @@ def main() -> int:
     print(
         f"Candidates / VLM attempts: {result.metrics.candidates_total} / {result.metrics.vlm_calls}"
     )
+    if config.temporal.enabled:
+        print(
+            "Complete triplets / VLM triplet attempts / single-frame fallback: "
+            f"{sum(r.temporal_complete for r in result.event_replay)} / "
+            f"{sum(len(r.vlm_frame_paths) == 3 for r in result.event_replay)} / "
+            f"{sum(len(r.vlm_frame_paths) == 1 for r in result.event_replay)}"
+        )
     print(f"Total seconds: {result.metrics.total_sec:.3f}")
     print(f"Decoded complete: {result.coverage.decoded_complete}")
     print("Diagnostics: " + ", ".join(sorted({d.code for d in result.diagnostics})))

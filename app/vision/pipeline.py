@@ -47,6 +47,10 @@ def _analyze(
     client: OllamaVisionClient | None = None,
 ) -> VisionAnalysisResult:
     """Core implementation; internal client injection supports deterministic unit tests."""
+    if config.temporal.enabled:
+        from app.vision.temporal_pipeline import analyze_temporal
+
+        return analyze_temporal(video_path, config, deadline, progress, client)
     started = time.perf_counter()
     result = VisionAnalysisResult(coverage=Coverage(sample_fps=config.sample_fps))
     last_progress = 0.0
@@ -83,7 +87,14 @@ def _analyze(
             result.metrics.decode_sec += time.perf_counter() - opening
             result.metadata = reader.metadata
             publish(True)
-            frames = iter(reader.sample(fps=config.sample_fps, max_side=config.max_frame_side))
+            frames = iter(
+                reader.sample(
+                    fps=config.sample_fps,
+                    max_side=config.max_frame_side,
+                    deadline=deadline,
+                    max_decoded_frames=config.max_decoded_frames,
+                )
+            )
             while True:
                 check_deadline()
                 decoding = time.perf_counter()
@@ -96,6 +107,7 @@ def _analyze(
                     break
                 result.metrics.decode_sec += time.perf_counter() - decoding
                 result.metrics.decoded_frames = reader.decoded_frames
+                result.metrics.first_pass_decoded_frames = reader.decoded_frames
                 result.coverage.decoded_until_sec = reader.decoded_until_sec
                 duration = result.metadata.duration_sec
                 if duration:
@@ -123,10 +135,13 @@ def _analyze(
                 result.metrics.sampled_frames += 1
                 publish()
             result.metrics.decoded_frames = reader.decoded_frames
+            result.metrics.first_pass_decoded_frames = reader.decoded_frames
             result.coverage.decoded_until_sec = reader.decoded_until_sec
         check_deadline()
         intervals = merge_intervals(hits, config.motion, result.coverage.decoded_until_sec or 0)
         result.metrics.candidates_total = len(intervals)
+        result.metrics.candidates_before_dedup = len(intervals)
+        result.metrics.candidates_after_dedup = len(intervals)
         if len(intervals) > config.max_candidates:
             diagnose("candidate_limit")
         unknown = VLMObservation.unknown().tri_state()
@@ -227,7 +242,13 @@ def _analyze(
         result.status = "timed_out"
         diagnose("processing_deadline", "error")
     except VideoError as exc:
-        result.status = "partial" if result.metrics.sampled_frames else "failed"
+        result.status = (
+            "timed_out"
+            if str(exc) == "processing_deadline"
+            else "partial"
+            if result.metrics.sampled_frames
+            else "failed"
+        )
         diagnose(str(exc), "error")
     except Exception as exc:
         # Avoid raw decoder, model and validation exception messages containing local data.
@@ -261,16 +282,20 @@ def analyze_video(video_path: Path, config: VisionConfig) -> VisionAnalysisResul
     """
     started = time.monotonic()
     deadline = started + config.max_seconds
+    reserve = min(config.worker_shutdown_reserve_sec, config.max_seconds * 0.1)
+    work_deadline = deadline - reserve
     result = VisionAnalysisResult(coverage=Coverage(sample_fps=config.sample_fps))
     context = mp.get_context("spawn")
     receiver, sender = context.Pipe(duplex=False)
-    process = context.Process(target=_worker, args=(Path(video_path), config, deadline, sender))
+    process = context.Process(
+        target=_worker, args=(Path(video_path), config, work_deadline, sender)
+    )
     terminal = False
     try:
         process.start()
         sender.close()
-        while time.monotonic() < deadline:
-            if receiver.poll(min(0.1, max(0, deadline - time.monotonic()))):
+        while time.monotonic() < work_deadline:
+            if receiver.poll(min(0.1, max(0, work_deadline - time.monotonic()))):
                 try:
                     message = receiver.recv()
                     result = VisionAnalysisResult.model_validate(message["result"])
@@ -281,7 +306,7 @@ def analyze_video(video_path: Path, config: VisionConfig) -> VisionAnalysisResul
                     break
             elif not process.is_alive():
                 break
-        if not terminal and time.monotonic() >= deadline:
+        if not terminal and time.monotonic() >= work_deadline:
             result.status = "timed_out"
             result.diagnostics.append(Diagnostic(code="processing_deadline", severity="error"))
         elif not terminal:
@@ -298,10 +323,16 @@ def analyze_video(video_path: Path, config: VisionConfig) -> VisionAnalysisResul
         if process.is_alive():
             process.terminate()
         if process.pid is not None:
-            process.join(timeout=1)
+            process.join(timeout=max(0, min(reserve / 2, deadline - time.monotonic())))
             if process.is_alive():
                 process.kill()
-                process.join(timeout=1)
-            process.close()
+                process.join(timeout=max(0, deadline - time.monotonic()))
+            if not process.is_alive():
+                process.close()
     result.metrics.total_sec = time.monotonic() - started
+    if result.status != "complete":
+        for replay in result.event_replay:
+            if replay.status == "pending":
+                replay.status = "incomplete"
+                replay.diagnostic_codes.append("analysis_interrupted")
     return result
