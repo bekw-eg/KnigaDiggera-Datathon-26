@@ -1,0 +1,766 @@
+[
+  {
+    "candidate_rule_id": "LR-001",
+    "title": "Специальное оборудование для проверки банкнот",
+    "source_id": "NB231",
+    "legal_reference": "п. 9",
+    "requirement_summary": "Банк обеспечивает оборудование для определения платежности и подлинности банкнот.",
+    "applicability_conditions": [
+      "Банк; осуществляются кассовые операции."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Инвентаризация оборудования, техническая документация и проверка работоспособности."
+    ],
+    "video_verifiability": "none",
+    "research_status": "verified",
+    "limitations": [
+      "Наличие прибора в кадре не доказывает его функции; модель не выдает detector_used или authenticity_checked.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-002",
+    "title": "Личные вещи в кассовом узле",
+    "source_id": "NB231",
+    "legal_reference": "п. 12",
+    "requirement_summary": "Личные вещи, собственные деньги и ценности работников хранятся вне кассового узла по внутреннему порядку; разрешен внос лекарств, медицинских изделий и связи без фото/видеофиксации.",
+    "applicability_conditions": [
+      "Работники банка; необходимо установить принадлежность вещи и границы кассового узла."
+    ],
+    "required_observations": [
+      "phone_visible",
+      "cash_visible"
+    ],
+    "required_nonvisual_evidence": [
+      "Внутренний порядок ForteBank; сведения о принадлежности и назначении вещи; характеристики средства связи."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "requires_internal_policy",
+    "limitations": [
+      "phone_visible=yes не доказывает личную вещь, хранение или наличие камеры. Не выводить универсальное правило о запрете всех телефонов.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": [
+      "NB71_2025"
+    ]
+  },
+  {
+    "candidate_rule_id": "LR-003",
+    "title": "Учет передачи между кассовыми работниками",
+    "source_id": "NB231",
+    "legal_reference": "п. 15 подп. 1)–4)",
+    "requirement_summary": "Передача наличных между кассовыми работниками отражается в документе учета с датой, данными и подписями передающего и получающего, суммой, количеством и видом наличных.",
+    "applicability_conditions": [
+      "Кассовые работники банка; установлена передача именно между ними."
+    ],
+    "required_observations": [
+      "cash_visible",
+      "object_transfer",
+      "transferred_object_cash"
+    ],
+    "required_nonvisual_evidence": [
+      "Назначения работников; документ учета и его реквизиты; связь записи с конкретной передачей."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "verified",
+    "limitations": [
+      "Фигура не устанавливает должность. Отсутствие бумаги в кадре не доказывает отсутствие учетного документа.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-004",
+    "title": "Основание приема наличных",
+    "source_id": "NB231",
+    "legal_reference": "пп. 17–18",
+    "requirement_summary": "Кассир принимает наличные от клиента на основании объявления на взнос либо приходного кассового ордера; формы устанавливает банк с обязательными реквизитами п. 18.",
+    "applicability_conditions": [
+      "Кассовый работник; установлена операция приема от клиента."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Приходный документ с реквизитами; операция в банковской системе; утвержденная форма."
+    ],
+    "video_verifiability": "none",
+    "research_status": "verified",
+    "limitations": [
+      "document_visible не устанавливает вид документа, реквизиты или электронное оформление.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-005",
+    "title": "Идентификация клиента",
+    "source_id": "NB231",
+    "legal_reference": "п. 19 подп. 1); п. 31 подп. 1)",
+    "requirement_summary": "При приеме и выдаче кассир визуально идентифицирует клиента по удостоверяющему документу либо идентифицирующим данным сервиса цифровых документов.",
+    "applicability_conditions": [
+      "Кассовый работник; подтверждены клиент и тип кассовой операции."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Подтверждение процедуры идентификации и полномочий представителя из разрешенных банковских источников."
+    ],
+    "video_verifiability": "none",
+    "research_status": "verified",
+    "limitations": [
+      "Система не распознает лица, не читает удостоверения и не должна реализовывать сравнение личности.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-006",
+    "title": "Пересчет и проверка при приеме",
+    "source_id": "NB231",
+    "legal_reference": "п. 19 подп. 2); пп. 57–58",
+    "requirement_summary": "Банкноты принимаются с полистным пересчетом, монеты — по кружкам; проверяются подлинность и платежность.",
+    "applicability_conditions": [
+      "Кассовый работник; прием наличных от клиента; вид валюты установлен отдельно."
+    ],
+    "required_observations": [
+      "cash_visible",
+      "hand_object_interaction",
+      "object_movement"
+    ],
+    "required_nonvisual_evidence": [
+      "Тип операции, полный непрерывный контекст, счетные и контрольные данные оборудования; для валюты — применимые официальные материалы."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "verified",
+    "limitations": [
+      "Ни количество купюр, ни проверка защитных признаков observations не выдаются. Содержание отсылочных требований №49 здесь не проверено.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": [
+      "NB71_2025"
+    ]
+  },
+  {
+    "candidate_rule_id": "LR-007",
+    "title": "Подписи и сумма при приеме",
+    "source_id": "NB231",
+    "legal_reference": "п. 19 подп. 3)–4)",
+    "requirement_summary": "Кассир проверяет подписи клиента и участвующего операционного работника, сверяет с образцами и сопоставляет сумму документа с фактически принятыми деньгами.",
+    "applicability_conditions": [
+      "Кассовый работник; операционный работник учитывается при его участии."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Документ, образцы подписей, сумма фактически принятых денег, данные об участии операционного работника."
+    ],
+    "video_verifiability": "none",
+    "research_status": "verified",
+    "limitations": [
+      "Нельзя получить подписи, сумму и результат сверки из document_visible=yes.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": [
+      "NB71_2025"
+    ]
+  },
+  {
+    "candidate_rule_id": "LR-008",
+    "title": "Подписание и штамп кассира",
+    "source_id": "NB231",
+    "legal_reference": "п. 19 подп. 5); п. 31 подп. 5)",
+    "requirement_summary": "Кассир подписывает все экземпляры соответствующего кассового документа и ставит на них свой штамп.",
+    "applicability_conditions": [
+      "Кассовый работник; применимы операции приема или выдачи, число экземпляров установлено."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Все экземпляры документа либо правомерная цифровая процедура, подписи и оттиски; экспертная проверка применимости."
+    ],
+    "video_verifiability": "none",
+    "research_status": "verified",
+    "limitations": [
+      "Движение руки над бумагой не подтверждает подпись/штамп; цифровые документы требуют отдельной проверки п. 10-1.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-009",
+    "title": "Выдача подтверждения клиенту",
+    "source_id": "NB231",
+    "legal_reference": "п. 19 подп. 6); п. 31 подп. 6)",
+    "requirement_summary": "После приема или выдачи кассир выдает клиенту документ, подтверждающий кассовую операцию.",
+    "applicability_conditions": [
+      "Кассовый работник; подтверждены операция и способ выдачи документа."
+    ],
+    "required_observations": [
+      "document_visible",
+      "object_transfer",
+      "transferred_object_document"
+    ],
+    "required_nonvisual_evidence": [
+      "Реквизиты подтверждения, связь с операцией, сведения о допустимом цифровом оформлении и выдаче."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "verified",
+    "limitations": [
+      "Переданная бумага не обязательно подтверждение операции; отсутствие бумажной передачи не доказывает невыдачу документа.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-010",
+    "title": "Прием и пересчет в присутствии клиента",
+    "source_id": "NB231",
+    "legal_reference": "п. 20, часть первая",
+    "requirement_summary": "Наличные принимаются и пересчитываются кассиром в присутствии клиента.",
+    "applicability_conditions": [
+      "Кассовый работник; подтверждены прием от клиента и период пересчета."
+    ],
+    "required_observations": [
+      "cash_visible",
+      "people_visible",
+      "physical_presence",
+      "reflection_possible"
+    ],
+    "required_nonvisual_evidence": [
+      "Тип и непрерывные границы операции, роли участников и обзор клиентской зоны без идентификации лиц."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "verified",
+    "limitations": [
+      "people_visible не считает людей и может включать отражение; physical_presence относится к любой фигуре, не к клиенту.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-011",
+    "title": "Ранее принятые деньги в закрываемых устройствах",
+    "source_id": "NB231",
+    "legal_reference": "п. 20, часть вторая",
+    "requirement_summary": "На рабочем месте находятся деньги текущего клиента; ранее принятые деньги хранятся в специальных устройствах на рабочем месте, закрывающихся на ключ.",
+    "applicability_conditions": [
+      "Кассовый работник; нужно отличить текущие деньги от ранее принятых и определить предназначенное устройство."
+    ],
+    "required_observations": [
+      "cash_visible",
+      "object_movement",
+      "object_occluded"
+    ],
+    "required_nonvisual_evidence": [
+      "Границы операций, происхождение наличных, схема рабочего места, характеристики устройства."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "verified",
+    "limitations": [
+      "Нет cash_origin или lock_state. Текст о закрывающемся на ключ устройстве не задает в этой норме отдельный секундный таймер запирания.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-012",
+    "title": "Раздельный прием по нескольким документам",
+    "source_id": "NB231",
+    "legal_reference": "п. 21",
+    "requirement_summary": "Если клиент вносит деньги по нескольким приходным документам, кассир принимает по каждому документу отдельно.",
+    "applicability_conditions": [
+      "Кассовый работник; один клиент вносит деньги по нескольким приходным документам."
+    ],
+    "required_observations": [
+      "cash_visible",
+      "document_visible",
+      "object_movement"
+    ],
+    "required_nonvisual_evidence": [
+      "Количество и реквизиты приходных документов, границы и суммы отдельных приемов."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "verified",
+    "limitations": [
+      "Несколько видимых листов не означают несколько приходных документов; движение денег не устанавливает раздельность учета.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-013",
+    "title": "Сохранение рабочего места до окончания обслуживания",
+    "source_id": "NB231",
+    "legal_reference": "п. 22",
+    "requirement_summary": "Кассовому работнику нельзя покидать рабочее место до окончания обслуживания клиента.",
+    "applicability_conditions": [
+      "Кассовый работник; обслуживание клиента еще продолжается; границы рабочего места подтверждены."
+    ],
+    "required_observations": [
+      "people_visible",
+      "physical_presence",
+      "reflection_possible"
+    ],
+    "required_nonvisual_evidence": [
+      "Непрерывная видеозапись, схема рабочего места, начало/окончание обслуживания и назначение работника."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "verified",
+    "limitations": [
+      "Нет cashier_left или service_complete; выход за crop не равен уходу. Triplet и отражение недостаточны.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-014",
+    "title": "Сдача принятой наличности заведующему",
+    "source_id": "NB231",
+    "legal_reference": "п. 23",
+    "requirement_summary": "Принятые за рабочий день деньги формируются, упаковываются и сдаются по приходным документам заведующему кассой или исполняющему его функции; допустима сдача несколько раз за день.",
+    "applicability_conditions": [
+      "Кассовый работник; прием за соответствующий рабочий день."
+    ],
+    "required_observations": [
+      "cash_visible",
+      "object_transfer",
+      "transferred_object_cash"
+    ],
+    "required_nonvisual_evidence": [
+      "Внутренний порядок ForteBank, приходные документы, данные о получателе и рабочем дне."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "requires_internal_policy",
+    "limitations": [
+      "Модель не устанавливает упаковку, должность получателя или выполнение полного дневного порядка.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-015",
+    "title": "Зачисление принятых денег",
+    "source_id": "NB231",
+    "legal_reference": "п. 26",
+    "requirement_summary": "Деньги, принятые от клиента, зачисляются на счет в тот же рабочий день; для денег от инкассации применяется договорный порядок.",
+    "applicability_conditions": [
+      "Банк; необходимо различить прием от клиента и от инкассации."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Банковские проводки, рабочий календарь, время приема, договор инкассации при применимости."
+    ],
+    "video_verifiability": "none",
+    "research_status": "verified",
+    "limitations": [
+      "Видео не подтверждает зачисление; рабочий день определяется графиком банка по п. 4, а не только календарной датой.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-016",
+    "title": "Прием и выдача ценностей по ордеру",
+    "source_id": "NB231",
+    "legal_reference": "пп. 27, 40",
+    "requirement_summary": "Прием и выдача ценностей оформляются внебалансовым ордером в порядке внутренних документов банка.",
+    "applicability_conditions": [
+      "Кассовый работник; предмет относится к ценностям в значении п. 2 подп. 17), а не просто к other."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Внебалансовый ордер, учет предмета и внутренний порядок ForteBank."
+    ],
+    "video_verifiability": "none",
+    "research_status": "requires_internal_policy",
+    "limitations": [
+      "transferred_object_other не устанавливает юридический вид ценности; нельзя считать любой предмет материальной ценностью в смысле Правил.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-017",
+    "title": "Документы при выдаче наличных",
+    "source_id": "NB231",
+    "legal_reference": "пп. 29–30",
+    "requirement_summary": "Выдача производится на основании чека либо расходного кассового ордера с обязательными реквизитами; условия предварительной заявки ЮЛ и ИП включают исключение при наличии требуемой суммы в кассе.",
+    "applicability_conditions": [
+      "Банк и кассовый работник; подтверждена выдача, категория клиента и наличие денег для исключения из заявки."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Расходный документ, статус клиента, заявка либо данные о достаточном остатке, утвержденная форма."
+    ],
+    "video_verifiability": "none",
+    "research_status": "verified",
+    "limitations": [
+      "Нельзя объявлять отсутствие предварительной заявки безусловным нарушением; документы не распознаются.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": [
+      "NB71_2025"
+    ]
+  },
+  {
+    "candidate_rule_id": "LR-018",
+    "title": "Пересчет перед выдачей и исключения упаковки",
+    "source_id": "NB231",
+    "legal_reference": "п. 31 подп. 4); п. 32",
+    "requirement_summary": "Кассир пересчитывает подготовленные деньги в присутствии клиента и выдает их. По п. 32 полные/неполные пачки и отдельные корешки выдаются по суммам на неповрежденной упаковке без полистного пересчета; банкноты из неполных или поврежденных корешков — полистно. Монеты в мешках выдаются по ярлыкам, в пакетах/тюбиках/коробках — по надписям; из неполных мешков — с пересчетом по кружкам.",
+    "applicability_conditions": [
+      "Кассовый работник; выдача клиенту; установлены вид, полнота и состояние упаковки."
+    ],
+    "required_observations": [
+      "cash_visible",
+      "object_transfer",
+      "transferred_object_cash",
+      "physical_presence"
+    ],
+    "required_nonvisual_evidence": [
+      "Тип операции, роли, непрерывная запись, данные о количестве и упаковке, надписи/ярлыки для монет."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "verified",
+    "limitations": [
+      "Отсутствие видимого полистного пересчета не доказывает нарушение; нет package_intact, denomination или cash_count.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-019",
+    "title": "Остаток наличных по окончании дня",
+    "source_id": "NB231",
+    "legal_reference": "п. 37",
+    "requirement_summary": "Кассир пересчитывает, сортирует, упаковывает и сдает остаток с расходными документами заведующему кассой или исполняющему функции для проверки и подшивки по внутреннему порядку.",
+    "applicability_conditions": [
+      "Кассовый работник; окончание рабочего дня и остаток установлены."
+    ],
+    "required_observations": [
+      "cash_visible",
+      "object_transfer",
+      "transferred_object_cash"
+    ],
+    "required_nonvisual_evidence": [
+      "График, остатки, расходные документы, полномочия получателя, внутренний порядок ForteBank."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "requires_internal_policy",
+    "limitations": [
+      "Короткий эпизод передачи не подтверждает завершение дня, сортировку, сумму или подшивку.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-020",
+    "title": "Оборудование с двумя защитными признаками",
+    "source_id": "NB231",
+    "legal_reference": "п. 41",
+    "requirement_summary": "Банк осуществляет пересчет и сортировку на оборудовании, проверяющем не менее двух машиночитаемых защитных признаков по Правилам №230.",
+    "applicability_conditions": [
+      "Банк; установлены кассовые операции пересчета и сортировки."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Документация, настройки и результаты контроля оборудования; выбранные признаки по пп. 37, 39 №230."
+    ],
+    "video_verifiability": "none",
+    "research_status": "verified",
+    "limitations": [
+      "Наличие счетной машины в видео не доказывает число и работоспособность проверяемых признаков.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-021",
+    "title": "Контролирующий работник при обработке",
+    "source_id": "NB231",
+    "legal_reference": "п. 42",
+    "requirement_summary": "Пересчет, сортировка и упаковка выполняются в присутствии контролирующего работника, кроме приема и выдачи денег клиенту.",
+    "applicability_conditions": [
+      "Кассовый и контролирующий работники; операция не относится к исключенному приему/выдаче клиенту."
+    ],
+    "required_observations": [
+      "people_visible",
+      "physical_presence",
+      "reflection_possible"
+    ],
+    "required_nonvisual_evidence": [
+      "Классификация операции, назначение контролера и непрерывный обзор нужных зон."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "verified",
+    "limitations": [
+      "Одна видимая фигура или отражение не доказывают отсутствие контролера; обязательность второго работника при каждом обслуживании клиента из этого пункта не следует.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-022",
+    "title": "Формирование корешков и пачек",
+    "source_id": "NB231",
+    "legal_reference": "пп. 46–47",
+    "requirement_summary": "Сто банкнот одного номинала формируются в корешок с установленной ориентацией и бандеролью; десять корешков — в пачку из тысячи листов с накладками и реквизитами.",
+    "applicability_conditions": [
+      "Кассовый работник; установлена операция формирования стандартных корешков и полных пачек."
+    ],
+    "required_observations": [
+      "cash_visible",
+      "hand_object_interaction",
+      "object_movement"
+    ],
+    "required_nonvisual_evidence": [
+      "Номинал и точное количество, ориентация, реквизиты бандероли/накладок, категория упаковки."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "verified",
+    "limitations": [
+      "Нет счетчика банкнот, распознавания номиналов и упаковки; для неполных/сборных пачек учитывать пп. 49–50.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-023",
+    "title": "Запирание и пломбирование кассет",
+    "source_id": "NB231",
+    "legal_reference": "п. 55",
+    "requirement_summary": "Для загрузки автоматических устройств наличные упаковываются в кассеты полистно; кассеты закрываются на ключ и пломбируются с защитой от несанкционированного вскрытия; вид пломб выбирает банк.",
+    "applicability_conditions": [
+      "Банк и выполняющий упаковку работник; кассета предназначена для загрузки автоматического устройства."
+    ],
+    "required_observations": [
+      "cash_visible",
+      "hand_object_interaction",
+      "object_movement"
+    ],
+    "required_nonvisual_evidence": [
+      "Назначение кассеты, полный цикл упаковки, состояние замка/пломбы и принятый банком вид пломбы."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "verified",
+    "limitations": [
+      "Нет cassette_closed или seal_intact; тип пломбы нельзя произвольно назначить в алгоритме.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": [
+      "NB71_2025"
+    ]
+  },
+  {
+    "candidate_rule_id": "LR-024",
+    "title": "Сомнительные банкноты на экспертизу",
+    "source_id": "NB231",
+    "legal_reference": "п. 59",
+    "requirement_summary": "При обнаружении сомнительных денег кассир в присутствии клиента и заведующего оформляет акт в двух экземплярах; деньги направляются в филиал НБК на экспертизу в течение пяти рабочих дней; возврат зависит от результата.",
+    "applicability_conditions": [
+      "Кассовый работник и банк; подтвержден факт сомнительности, а не внешний вид предмета."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Акт, результаты экспертизы, регистрация и отправка, календарь, выдача клиентского экземпляра и результат."
+    ],
+    "video_verifiability": "none",
+    "research_status": "verified",
+    "limitations": [
+      "Не считать подозрительную окраску/качество VLM экспертизой. Запрет возврата денег с признаками подделки по п. 61 — отдельное основание.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-025",
+    "title": "Сверка кассовых оборотов и остатков",
+    "source_id": "NB231",
+    "legal_reference": "пп. 64–65",
+    "requirement_summary": "По окончании дня заведующий составляет сводный документ, сверяет с бухгалтерией и подшивает; ответственные лица проверяют приход, расход и остаток, при расхождении оформляется акт.",
+    "applicability_conditions": [
+      "Заведующий кассой или исполняющий функции и лица, ответственные за сохранность; рабочий день завершен."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Приходные/расходные документы, сводный документ, бухгалтерия, фактические остатки, акт и банковская форма."
+    ],
+    "video_verifiability": "none",
+    "research_status": "verified",
+    "limitations": [
+      "Визуальное перемещение наличных не доказывает недостачу, хищение или неверный учет.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-026",
+    "title": "Доступ в кладовую и сейфовую комнату",
+    "source_id": "NB231",
+    "legal_reference": "п. 75",
+    "requirement_summary": "Вход разрешен ответственным за сохранность, а иным лицам — по распорядительному документу руководителя при сопровождении ответственных.",
+    "applicability_conditions": [
+      "Банк; установлены границы именно кладовой/сейфовой комнаты и факт входа."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Приказы о назначении, распоряжение на доступ, сопровождение, схема помещения и журнал доступа."
+    ],
+    "video_verifiability": "none",
+    "research_status": "verified",
+    "limitations": [
+      "Верхняя камера стола не устанавливает вход в кладовую, личность или полномочия. Нельзя активировать правило о постороннем по people_visible.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-027",
+    "title": "Порядок обращения с ключами и штампами",
+    "source_id": "NB231",
+    "legal_reference": "п. 80",
+    "requirement_summary": "Внутренние документы банка определяют защищающий от несанкционированного использования порядок хранения, выдачи и передачи ценностей, печатей, ключей, кодов и перечисленных средств.",
+    "applicability_conditions": [
+      "Банк; необходимо установить вид средства и применимый внутренний порядок."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Утвержденная инструкция ForteBank, учет выдачи/передачи, полномочия, подтвержденный вид предмета."
+    ],
+    "video_verifiability": "none",
+    "research_status": "requires_internal_policy",
+    "limitations": [
+      "Нет key_visible, seal_visible, authorization или данных о кодах; не передавать секретные коды в каталог.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": []
+  },
+  {
+    "candidate_rule_id": "LR-028",
+    "title": "Ветхие и поврежденные платежные деньги",
+    "source_id": "NB230",
+    "legal_reference": "п. 12",
+    "requirement_summary": "Платежные ветхие банкноты и дефектные монеты сортируются, не выпускаются в обращение и передаются в филиалы НБК для обмена на годные.",
+    "applicability_conditions": [
+      "Уполномоченный банк по п. 2; национальная валюта, кроме монет из драгоценных металлов; платежность и категория подтверждены."
+    ],
+    "required_observations": [
+      "cash_visible",
+      "object_transfer",
+      "transferred_object_cash"
+    ],
+    "required_nonvisual_evidence": [
+      "Результаты проверки подлинности/платежности и состояния, сортировка, реестр передачи в филиал НБК."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "verified",
+    "limitations": [
+      "Камера и observations не устанавливают ветхость, платежность или направление выпуска; окрашенный прямоугольник не равен ветхой банкноте.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": [
+      "NB37_2024"
+    ]
+  },
+  {
+    "candidate_rule_id": "LR-029",
+    "title": "Транспортирующее устройство кассы",
+    "source_id": "NB14",
+    "legal_reference": "п. 16 подп. 4); №88 п. 5 подп. 4)",
+    "requirement_summary": "Передняя часть кассы оборудуется специальным устройством передачи наличных и ценностей с исправным механизмом приведения в действие и фиксации внутри кассы.",
+    "applicability_conditions": [
+      "Банк; помещение относится к кассе, не только к автоматическому устройству по п. 18; временный текст действует на 18.10.2026."
+    ],
+    "required_observations": [
+      "object_transfer",
+      "object_movement"
+    ],
+    "required_nonvisual_evidence": [
+      "План и тип помещения, техническая документация и осмотр исправности устройства."
+    ],
+    "video_verifiability": "partial",
+    "research_status": "verified",
+    "limitations": [
+      "Обязанность об устройстве помещения не означает отдельный запрет любого жеста кассира вне лотка. На 18.10.2026 не подставлять текст, приостановленный до 01.01.2027.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": [
+      "NB88_2024"
+    ]
+  },
+  {
+    "candidate_rule_id": "LR-030",
+    "title": "Касса с системой видеонаблюдения",
+    "source_id": "NB14",
+    "legal_reference": "п. 16 подп. 6); №88 п. 5 подп. 4)",
+    "requirement_summary": "Касса оборудуется видеокамерами системы видеонаблюдения.",
+    "applicability_conditions": [
+      "Банк; подтвержден тип помещения и применимость п. 16, учтено исключение п. 18."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Инвентаризация и схема CCTV, фактическое оснащение кассы и технический осмотр."
+    ],
+    "video_verifiability": "none",
+    "research_status": "verified",
+    "limitations": [
+      "Файл сверху сам по себе не доказывает все оснащение или параметры системы. В этом подпункте не установлен произвольный срок архива или обязательное аудио.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": [
+      "NB88_2024"
+    ]
+  },
+  {
+    "candidate_rule_id": "LR-031",
+    "title": "Количество монет в мешках и саше",
+    "source_id": "NB231",
+    "legal_reference": "п. 51; п. 53-1, часть вторая; №78 п. 6 Перечня",
+    "requirement_summary": "В опубликованном тексте заданы количества монет по номиналам в мешке и саше; применимость последней поправки требует разрешения расхождения статуса №78.",
+    "applicability_conditions": [
+      "Кассовый работник; установлена упаковка монет соответствующего вида, номинала и валюты."
+    ],
+    "required_observations": [],
+    "required_nonvisual_evidence": [
+      "Подтвержденный статус №78, официальная редакция, точный номинал/количество и тип упаковки."
+    ],
+    "video_verifiability": "none",
+    "research_status": "unverified",
+    "limitations": [
+      "Не загружать числовые нормативы в движок, пока не сверены статус и дата редакции. observations не считают монеты.",
+      "yes/no/unknown — наблюдения, не юридические факты; unknown и неполное покрытие не подтверждают ни соблюдение, ни нарушение."
+    ],
+    "activation_eligible": false,
+    "supporting_source_ids": [
+      "NB78_2026"
+    ]
+  }
+]
