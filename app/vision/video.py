@@ -1,6 +1,7 @@
 """Streaming PyAV decoder with explicit, validated presentation timestamps."""
 
 import math
+import time
 from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
@@ -133,6 +134,8 @@ class VideoReader:
         start_sec: float = 0,
         end_sec: float | None = None,
         max_side: int = 1280,
+        deadline: float | None = None,
+        max_decoded_frames: int | None = None,
     ) -> Iterator[VideoFrame]:
         """Decode sequentially, yielding first frame at/after each sampling target.
 
@@ -150,7 +153,16 @@ class VideoReader:
         origin = self.metadata.stream_start_sec
         previous = None
         try:
-            for frame in self._container.decode(self._stream):
+            decoded = iter(self._container.decode(self._stream))
+            while True:
+                if deadline is not None and time.monotonic() >= deadline:
+                    raise VideoError("processing_deadline")
+                if max_decoded_frames is not None and self.decoded_frames >= max_decoded_frames:
+                    raise VideoError("decode_frame_limit")
+                try:
+                    frame = next(decoded)
+                except StopIteration:
+                    break
                 if origin is None:
                     if frame.pts is None or frame.time_base is None:
                         raise TimestampError("missing_initial_pts")

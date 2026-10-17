@@ -74,6 +74,29 @@ class ROI(ContractModel):
         cv2.fillPoly(mask, [self.pixels(width, height)], 255)
         return mask
 
+    def overlaps(self, other: "ROI") -> bool:
+        """Intersect normalized simple polygons, including containment/touching edges.
+
+        Work in calibrated coordinates so thin ROIs cannot alias on a small raster.
+        This only establishes region overlap, not overlap of physical actions.
+        """
+        a_edges = list(zip(self.polygon, self.polygon[1:] + self.polygon[:1], strict=True))
+        b_edges = list(zip(other.polygon, other.polygon[1:] + other.polygon[:1], strict=True))
+        if any(_intersects(a, b, c, d) for a, b in a_edges for c, d in b_edges):
+            return True
+
+        def contains(point: Point, edges: list[tuple[Point, Point]]) -> bool:
+            x, y = point
+            inside = False
+            for a, b in edges:
+                if (a[1] > y) != (b[1] > y) and x < (
+                    (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]
+                ):
+                    inside = not inside
+            return inside
+
+        return contains(other.polygon[0], a_edges) or contains(self.polygon[0], b_edges)
+
     def box_overlap(self, box: Box, width: int, height: int) -> float:
         """Fraction of the clipped bounding box lying inside this ROI (not probability)."""
         x1, y1, x2, y2 = box

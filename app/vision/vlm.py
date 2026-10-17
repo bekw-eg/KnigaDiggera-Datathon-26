@@ -96,6 +96,61 @@ class VLMObservation(ContractModel):
         return output
 
 
+TEMPORAL_PROMPT = """The images have explicitly supplied before/during/after roles.
+Compare only visible changes in chronological order. Is cash actually visible?
+A white rectangle alone is not cash. Is an object visibly moving? Is a hand visibly
+interacting with it? Can its position change be followed? Report object_occluded if
+a hand/other object hides it. Similar objects before/after occlusion do not establish
+identity. Reflections, proximity and synchronized motion do not prove transfer.
+Three frames can miss intermediate actions. Use unknown for missing or ambiguous
+evidence. Never call a person an offender or infer a legal violation.
+Return compact JSON without whitespace or explanations. Set observations to []."""
+
+
+class TemporalVLMObservation(VLMObservation):
+    observations: list[str] = Field(max_length=0)
+    object_movement: Observation
+    hand_object_interaction: Observation
+    position_change_trackable: Observation
+    object_occluded: Observation
+
+    @classmethod
+    def unknown(cls) -> "TemporalVLMObservation":
+        return cls(
+            **VLMObservation.unknown().model_dump(),
+            object_movement=Observation.UNKNOWN,
+            hand_object_interaction=Observation.UNKNOWN,
+            position_change_trackable=Observation.UNKNOWN,
+            object_occluded=Observation.UNKNOWN,
+        )
+
+    @model_validator(mode="after")
+    def temporal_consistency(self) -> "TemporalVLMObservation":
+        if (
+            self.object_movement != Observation.YES
+            or self.hand_object_interaction != Observation.YES
+            or self.position_change_trackable != Observation.YES
+            or self.object_occluded != Observation.NO
+            or self.reflection_possible != Observation.NO
+        ):
+            object.__setattr__(self, "object_transfer", Observation.UNKNOWN)
+            object.__setattr__(self, "transferred_object", ObjectKind.UNKNOWN)
+        if self.transferred_object == ObjectKind.CASH and self.cash_visible != Observation.YES:
+            object.__setattr__(self, "transferred_object", ObjectKind.UNKNOWN)
+        return self
+
+    def tri_state(self) -> dict[str, Observation]:
+        output = super().tri_state()
+        for name in (
+            "object_movement",
+            "hand_object_interaction",
+            "position_change_trackable",
+            "object_occluded",
+        ):
+            output[name] = getattr(self, name)
+        return output
+
+
 class VLMConfig(ContractModel):
     host: str = "http://127.0.0.1:11434"
     model: str = "qwen2.5vl:3b"
@@ -237,7 +292,13 @@ class OllamaVisionClient:
                 sdk._client.close()
 
     def observe(
-        self, paths: list[Path], timestamps: list[float], roi: ROI | None = None
+        self,
+        paths: list[Path],
+        timestamps: list[float],
+        roi: ROI | None = None,
+        *,
+        temporal: bool = False,
+        roles: list[str] | None = None,
     ) -> VLMResult:
         """Send 1–3 resized local JPEGs chronologically; reject invalid/truncated JSON."""
         if not 1 <= len(paths) <= self.config.max_images or len(paths) != len(timestamps):
@@ -246,6 +307,13 @@ class OllamaVisionClient:
             raise ValueError("invalid image timestamps")
         if timestamps != sorted(timestamps) or len(set(timestamps)) != len(timestamps):
             raise ValueError("images must have strictly increasing timestamps")
+        if temporal and (
+            roles is None
+            or len(roles) != len(paths)
+            or roles != [r for r in ("before", "during", "after") if r in roles]
+        ):
+            raise ValueError("invalid temporal roles")
+        schema = TemporalVLMObservation if temporal else VLMObservation
         images = []
         for path in paths:
             try:
@@ -268,14 +336,18 @@ class OllamaVisionClient:
                 response = sdk.chat(
                     model=self.config.model,
                     messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {
+                            "role": "system",
+                            "content": SYSTEM_PROMPT + ("\n" + TEMPORAL_PROMPT if temporal else ""),
+                        },
                         {
                             "role": "user",
-                            "content": f"Frame times (seconds): {timestamps}",
+                            "content": f"Frame times (seconds): {timestamps}"
+                            + (f"; roles: {roles}" if temporal else ""),
                             "images": images,
                         },
                     ],
-                    format=VLMObservation.model_json_schema(),
+                    format=schema.model_json_schema(),
                     stream=False,
                     options={
                         "temperature": 0,
@@ -285,7 +357,7 @@ class OllamaVisionClient:
                 )
                 if _get(response, "done_reason") == "length":
                     raise VLMError("vlm_output_truncated")
-                observation = VLMObservation.model_validate_json(
+                observation = schema.model_validate_json(
                     _get(_get(response, "message"), "content", "")
                 )
             except ValidationError:
@@ -302,7 +374,7 @@ class OllamaVisionClient:
             finally:
                 if self._injected is None:
                     sdk._client.close()
-        if len(images) == 1:
+        if len(images) == 1 or (temporal and roles != ["before", "during", "after"]):
             # A single still is not temporal evidence of an object transfer.
             observation.object_transfer = Observation.UNKNOWN
             observation.transferred_object = ObjectKind.UNKNOWN
