@@ -6,6 +6,7 @@ from pydantic import Field
 
 from app.schemas import ContractModel
 from app.vision.motion import MotionConfig
+from app.vision.roi import CameraProfile
 from app.vision.vlm import VLMConfig
 
 
@@ -19,7 +20,7 @@ class VisionConfig(ContractModel):
     jpeg_quality: int = Field(default=85, ge=1, le=100)
     output_dir: Path = Path("artifacts/vision")
     roi_path: Path | None = None
-    camera_profile: str | None = None
+    camera_profile: CameraProfile | None = None
     motion: MotionConfig = Field(default_factory=MotionConfig)
     vlm: VLMConfig = Field(default_factory=VLMConfig)
     yolo_enabled: bool = False

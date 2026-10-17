@@ -11,6 +11,9 @@ from app.schemas import ContractModel
 from app.vision.video import Image
 
 Coordinate = Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)]
+CameraProfile = Annotated[
+    str, Field(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.:-]*$")
+]
 Point = tuple[Coordinate, Coordinate]
 Box = tuple[float, float, float, float]
 
@@ -97,7 +100,7 @@ class ROI(ContractModel):
 
 
 class ROIConfig(ContractModel):
-    camera_profile: str
+    camera_profile: CameraProfile
     calibrated: bool = False
     demonstration: bool = True
     rois: list[ROI]
