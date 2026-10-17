@@ -18,6 +18,12 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<10", "ruff>=0.12,<1"]
+backend = [
+  "fastapi>=0.110.0",
+  "uvicorn[standard]>=0.28.0",
+  "aiosqlite>=0.20.0",
+  "python-multipart>=0.0.9",
+]
 yolo = ["ultralytics>=8.3,<9"]
 
 [tool.setuptools.packages.find]

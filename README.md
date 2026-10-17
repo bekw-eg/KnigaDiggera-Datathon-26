@@ -17,7 +17,7 @@ Vision-моделью. Большие модели автоматически н
 py -3.14 -m venv .venv  # либо другой установленный Python >=3.11
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,backend]"
 
 # Проверка сервиса и capability vision; без отправки кадров:
 Invoke-RestMethod http://127.0.0.1:11434/api/tags
@@ -45,6 +45,11 @@ ruff format --check .
 Если PowerShell запрещает активацию, используйте `.\.venv\Scripts\python.exe`
 напрямую; менять системную execution policy не требуется. На машинах без `py`
 подойдёт `python -m venv .venv` при подходящей версии Python.
+
+Группа `backend` нужна для общего набора тестов после интеграции API:
+FastAPI, SQLite и multipart-загрузка. Она не добавляет Streamlit и не запускает
+сервис или ML. Для отдельной работы с vision достаточно `.[dev]`.
+См. [проверки интеграции](docs/ci.md).
 
 CLI возвращает exit code 0 только для `complete`, 2 для неполной/ошибочной обработки.
 Отчёты и JPEG остаются локально в игнорируемом `artifacts/`. CLI запускайте как
