@@ -1,6 +1,6 @@
 """Shared ML → Rule Engine contract; no legal evaluation lives here."""
 
-from enum import Enum
+from enum import StrEnum
 from typing import Annotated, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -12,7 +12,7 @@ class ContractModel(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_assignment=True, allow_inf_nan=False)
 
 
-class Observation(str, Enum):
+class Observation(StrEnum):
     YES = "yes"
     NO = "no"
     UNKNOWN = "unknown"
@@ -36,7 +36,7 @@ class CandidateEvent(ContractModel):
         return self
 
 
-class VerificationState(str, Enum):
+class VerificationState(StrEnum):
     CONFIRMED = "confirmed"
     UNCERTAIN = "uncertain"
     REJECTED = "rejected"
