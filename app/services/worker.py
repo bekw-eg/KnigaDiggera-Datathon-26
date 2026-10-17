@@ -13,13 +13,12 @@ import io
 import logging
 from pathlib import Path
 from typing import Any
-from uuid import uuid4
 
 from app.core.config import settings
 from app.db.database import save_job_result, update_job_status
 from app.db.models import VerdictEnum
 from app.rules.engine import RULE_CATALOG, evaluate_candidate
-from app.schemas import CandidateEvent, Observation, VerificationState, VerifiedEvent
+from app.schemas import CandidateEvent, VerificationState, VerifiedEvent
 
 logger = logging.getLogger("worker")
 
@@ -37,6 +36,7 @@ except ImportError:
 
 
 # ── Base64 конвертер для доказательств ────────────────────────────────
+
 
 def frame_to_base64(frame_data: Any) -> str:
     """
@@ -60,6 +60,7 @@ def frame_to_base64(frame_data: Any) -> str:
     # Обработка PIL.Image
     try:
         from PIL import Image
+
         if isinstance(frame_data, Image.Image):
             buf = io.BytesIO()
             frame_data.save(buf, format="JPEG", quality=85)
@@ -71,8 +72,11 @@ def frame_to_base64(frame_data: Any) -> str:
     try:
         import cv2  # type: ignore
         import numpy as np  # type: ignore
+
         if isinstance(frame_data, np.ndarray):
-            success, encoded_img = cv2.imencode(".jpg", frame_data, [int(cv2.IMWRITE_JPEG_QUALITY), 85])
+            success, encoded_img = cv2.imencode(
+                ".jpg", frame_data, [int(cv2.IMWRITE_JPEG_QUALITY), 85]
+            )
             if success:
                 return base64.b64encode(encoded_img.tobytes()).decode("utf-8")
     except ImportError:
@@ -83,6 +87,7 @@ def frame_to_base64(frame_data: Any) -> str:
 
 # ── Запуск ML анализа ────────────────────────────────────────────────
 
+
 async def run_ml_pipeline(video_path: str) -> list[CandidateEvent]:
     """
     Запускает ML пайплайн (analyze_video).
@@ -90,7 +95,7 @@ async def run_ml_pipeline(video_path: str) -> list[CandidateEvent]:
     Если ML модуль не смонтирован локально — возвращает дефолтный пустой список кандидатов.
     """
     path_obj = Path(video_path)
-    
+
     if vision_analyze_video is not None and VisionConfig is not None:
         try:
             config = VisionConfig()
@@ -99,14 +104,17 @@ async def run_ml_pipeline(video_path: str) -> list[CandidateEvent]:
             if hasattr(result, "events"):
                 return result.events
         except Exception as e:
-            logger.warning("Ошибка при запуске vision_analyze_video: %s. Переход на резервный режим.", e)
-            
+            logger.warning(
+                "Ошибка при запуске vision_analyze_video: %s. Переход на резервный режим.", e
+            )
+
     logger.info("ML пайплайн работает в режиме готовности для: %s", video_path)
     await asyncio.sleep(0.1)
     return []
 
 
 # ── Конвейер анализа видео ──────────────────────────────────────────
+
 
 async def run_pipeline(video_path: str) -> dict[str, Any]:
     """
@@ -117,44 +125,50 @@ async def run_pipeline(video_path: str) -> dict[str, Any]:
     """
     # 1. Извлечение кандидатов
     candidates: list[CandidateEvent] = await run_ml_pipeline(video_path)
-    
+
     # 2. Оценка через Rule Engine
     verified_events: list[tuple[CandidateEvent, VerifiedEvent]] = []
     for cand in candidates:
         verified = evaluate_candidate(cand)
         verified_events.append((cand, verified))
-        
+
     # 3. Формирование подтвержденных нарушений
     parsed_violations: list[dict[str, Any]] = []
-    
+
     for cand, verified in verified_events:
         if verified.state == VerificationState.CONFIRMED:
             rule_meta = RULE_CATALOG.get(verified.rule_id or "", {})
             v_type = rule_meta.get("violation_type", "regulatory_violation")
-            
+
             # Кодируем доказательные кадры
             evidence_frames: list[dict[str, Any]] = []
             for frame_path in cand.frame_paths:
                 try:
                     b64 = frame_to_base64(frame_path)
-                    evidence_frames.append({
-                        "timestamp_sec": cand.start_sec,
-                        "image_base64": b64,
-                    })
+                    evidence_frames.append(
+                        {
+                            "timestamp_sec": cand.start_sec,
+                            "image_base64": b64,
+                        }
+                    )
                 except Exception as ex:
                     logger.warning("Не удалось закодировать кадр %s: %s", frame_path, ex)
-            
-            timecode = verified.evidence_timestamps[0] if verified.evidence_timestamps else cand.start_sec
-            
-            parsed_violations.append({
-                "type": v_type,
-                "timecode_sec": float(timecode),
-                "description": verified.explanation,
-                "evidence_frames": evidence_frames,
-            })
-            
+
+            timecode = (
+                verified.evidence_timestamps[0] if verified.evidence_timestamps else cand.start_sec
+            )
+
+            parsed_violations.append(
+                {
+                    "type": v_type,
+                    "timecode_sec": float(timecode),
+                    "description": verified.explanation,
+                    "evidence_frames": evidence_frames,
+                }
+            )
+
     verdict = VerdictEnum.violation.value if parsed_violations else VerdictEnum.no_violation.value
-    
+
     return {
         "verdict": verdict,
         "violations": parsed_violations,
@@ -162,6 +176,7 @@ async def run_pipeline(video_path: str) -> dict[str, Any]:
 
 
 # ── Обработка одной задачи ──────────────────────────────────────────
+
 
 async def process_job(job_id: str, video_path: str) -> None:
     """
@@ -173,7 +188,7 @@ async def process_job(job_id: str, video_path: str) -> None:
     """
     logger.info("Начало обработки задачи %s (видео: %s)", job_id, video_path)
     await update_job_status(job_id, status="processing")
-    
+
     try:
         # Жесткий таймаут 300 секунд (5 минут)
         result = await asyncio.wait_for(
@@ -182,12 +197,12 @@ async def process_job(job_id: str, video_path: str) -> None:
         )
         await save_job_result(job_id, result)
         logger.info("Задача %s успешно выполнена. Вердикт: %s", job_id, result.get("verdict"))
-        
-    except asyncio.TimeoutError:
+
+    except TimeoutError:
         error_msg = f"Превышен лимит времени выполнения ({TIMEOUT_SECONDS} сек)"
         logger.error("Задача %s завершилась по таймауту: %s", job_id, error_msg)
         await update_job_status(job_id, status="failed", error_message=error_msg)
-        
+
     except Exception as exc:
         error_msg = f"Ошибка обработки: {str(exc)}"
         logger.exception("Ошибка при обработке задачи %s: %s", job_id, error_msg)
@@ -196,11 +211,13 @@ async def process_job(job_id: str, video_path: str) -> None:
 
 # ── Синглтон-очередь с гарантией 1 воркера ────────────────────────────
 
+
 class VideoTaskQueue:
     """
     Очередь задач с единственным асинхронным консьюмером.
     Гарантирует, что одновременно обрабатывается строго 1 видео.
     """
+
     def __init__(self) -> None:
         self._queue: asyncio.Queue[tuple[str, str]] | None = None
         self._worker_task: asyncio.Task[None] | None = None
@@ -219,7 +236,7 @@ class VideoTaskQueue:
                 job_id, video_path = await q.get()
             except asyncio.CancelledError:
                 break
-            
+
             try:
                 await process_job(job_id, video_path)
             except Exception as e:
