@@ -25,12 +25,12 @@ async def verify_api_key(
             detail="Отсутствует обязательный заголовок 'X-API-Key'",
             headers={"WWW-Authenticate": "ApiKey"},
         )
-    
+
     if api_key != settings.API_KEY:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Неверный 'X-API-Key'. Доступ запрещен.",
             headers={"WWW-Authenticate": "ApiKey"},
         )
-    
+
     return api_key

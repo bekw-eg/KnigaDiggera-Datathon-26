@@ -7,8 +7,9 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime, timezone
-from pathlib import Path
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 from typing import Any
 
 import aiosqlite
@@ -19,9 +20,10 @@ DB_PATH = settings.DB_PATH
 
 # ── helpers ──────────────────────────────────────────────────────────
 
+
 def _now_iso() -> str:
     """UTC timestamp in ISO-8601."""
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def _new_job_id() -> str:
@@ -51,10 +53,6 @@ async def init_db() -> None:
         await db.commit()
 
 
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
-
-
 @asynccontextmanager
 async def get_db() -> AsyncIterator[aiosqlite.Connection]:
     """Provide a dedicated connection context with row_factory enabled."""
@@ -67,6 +65,7 @@ async def get_db() -> AsyncIterator[aiosqlite.Connection]:
 
 
 # ── CRUD ─────────────────────────────────────────────────────────────
+
 
 async def create_job(video_path: str) -> dict[str, Any]:
     """Insert a new job row and return it as dict."""
@@ -142,9 +141,6 @@ async def save_job_result(job_id: str, result: dict[str, Any]) -> None:
 async def list_jobs(limit: int = 50) -> list[dict[str, Any]]:
     """Return the most recent jobs (newest first)."""
     async with get_db() as db:
-        cursor = await db.execute(
-            "SELECT * FROM jobs ORDER BY created_at DESC LIMIT ?", (limit,)
-        )
+        cursor = await db.execute("SELECT * FROM jobs ORDER BY created_at DESC LIMIT ?", (limit,))
         rows = await cursor.fetchall()
         return [dict(r) for r in rows]
-

@@ -5,23 +5,23 @@ Pydantic v2 models — строго по ТЗ ForteBank / Datathon 26.
 
 from __future__ import annotations
 
-from datetime import datetime
 from enum import Enum
-from typing import Any
 
 from pydantic import BaseModel, Field
 
-
 # ── Enums ────────────────────────────────────────────────────────────
 
-class VerdictEnum(str, Enum):
+
+class VerdictEnum(str, Enum):  # noqa: UP042 - preserve existing str(member) behavior
     """Итоговый вердикт по видео."""
+
     no_violation = "no_violation"
     violation = "violation"
 
 
-class JobStatusEnum(str, Enum):
+class JobStatusEnum(str, Enum):  # noqa: UP042 - preserve existing str(member) behavior
     """Статус задачи в очереди."""
+
     queued = "queued"
     processing = "processing"
     done = "done"
@@ -31,8 +31,10 @@ class JobStatusEnum(str, Enum):
 
 # ── Evidence & Violations ───────────────────────────────────────────
 
+
 class EvidenceFrame(BaseModel):
     """Кадр-доказательство нарушения."""
+
     timestamp_sec: float = Field(
         ...,
         description="Секунда видео, откуда извлечён кадр",
@@ -46,6 +48,7 @@ class EvidenceFrame(BaseModel):
 
 class Violation(BaseModel):
     """Одно конкретное нарушение, найденное на видео."""
+
     type: str = Field(
         ...,
         description="Тип нарушения (напр. 'cash_not_counted', 'no_greeting')",
@@ -69,8 +72,10 @@ class Violation(BaseModel):
 
 # ── Job result (то, что возвращаем жюри) ────────────────────────────
 
+
 class JobResultResponse(BaseModel):
     """Полный ответ с результатом анализа видео."""
+
     job_id: str
     status: JobStatusEnum
     verdict: VerdictEnum | None = Field(
@@ -89,8 +94,10 @@ class JobResultResponse(BaseModel):
 
 # ── Request schemas ─────────────────────────────────────────────────
 
+
 class JobCreateRequest(BaseModel):
     """Тело запроса на создание задачи (по пути или URL)."""
+
     video_url: str | None = Field(
         None,
         description="URL видеофайла для анализа",
@@ -103,6 +110,7 @@ class JobCreateRequest(BaseModel):
 
 class JobStatusResponse(BaseModel):
     """Краткий ответ о статусе задачи (без тяжёлого result)."""
+
     job_id: str
     status: JobStatusEnum
     created_at: str | None = None
