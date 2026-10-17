@@ -1,0 +1,19 @@
+{
+  "sample_fps": 2,
+  "max_seconds": 300,
+  "max_sampled_frames": 1200,
+  "max_candidates": 24,
+  "max_vlm_calls": 6,
+  "output_dir": "artifacts/vision",
+  "roi_path": "configs/roi.json",
+  "camera_profile": null,
+  "vlm": {
+    "model": "qwen2.5vl:3b",
+    "timeout_sec": 60,
+    "num_ctx": 2048,
+    "num_predict": 200,
+    "max_images": 1,
+    "max_side": 1024
+  },
+  "yolo_enabled": false
+}
