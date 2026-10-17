@@ -1,4 +1,5 @@
 .venv/
+.venv-roi/
 venv/
 __pycache__/
 *.py[cod]
@@ -14,6 +15,7 @@ dist/
 data/
 datasets/
 artifacts/
+configs/*.local.json
 tmp/
 temp/
 models/

@@ -97,6 +97,36 @@ heavy VLM requests across local jobs and benchmark. Lock waits consume request a
 job budgets. Closing/terminating the client does not prove immediate cancellation
 inside Ollama. The backend should avoid overlapping repeated timed-out jobs.
 
+## Manual ROI calibration
+
+`app/vision/calibration.py` provides pure display transforms, local frame loading,
+an editable session and atomic `save_rois`. `scripts/calibrate_roi.py` and
+`scripts/roi_editor.py` provide an opt-in OpenCV desktop editor; import/CI never
+opens a native window. Headless OpenCV remains the default pipeline dependency;
+the README describes an isolated GUI environment. No new runtime dependency or
+CandidateEvent field is required.
+
+Normalized geometry uses inclusive raster endpoints `(width-1, height-1)`, exactly
+as `ROI.pixels`; the editor owns scaling in an autosized window with +/- controls.
+MOV selection uses the existing PTS-aware reader, choosing the first frame at/after
+the requested relative seconds, without changing rotation/orientation or exporting
+the frame. Sequential decode can be slow at late timestamps.
+
+Saving and activation are separate: S always writes an inactive draft. P validates
+and shows all zones; C then Y explicitly confirms the camera and geometry before
+writing an active config. Editing invalidates review. Demo configs stay inactive;
+safe_area requires an explicit visibility assertion. Existing camera_profile fields
+in ROIConfig/VisionConfig now reject empty/unsafe identifiers (ASCII camera slugs,
+1-128 characters); mismatches still fail closed. Camera identity/pose matching is
+manual, not inferred from pixels. The shared ML/Rule Engine contract is unchanged.
+
+The repository demonstration config is read-only to this tool. Each write validates
+ROIConfig, fsyncs a sibling temporary file and atomically publishes it: replace with
+explicit overwrite, or create-if-absent via hard link. Filesystems without this
+operation fail visibly and preserve existing output. No sensitive media or source
+filenames are stored in calibration JSON. Real calibration and GUI desktop usability
+must be checked on the actual local camera; synthetic tests cannot establish them.
+
 ## References used for implementation
 
 - [PyAV time and PTS](https://pyav.org/docs/stable/api/time.html)
