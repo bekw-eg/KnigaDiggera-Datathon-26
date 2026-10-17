@@ -1,1 +1,5 @@
-"""Participant 1 extension point: worker and persistence (not implemented here)."""
+"""Core package: settings and application configs."""
+
+from app.core.config import settings
+
+__all__ = ["settings"]
