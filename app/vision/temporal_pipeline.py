@@ -13,7 +13,14 @@ from app.schemas import CandidateEvent, Observation
 from app.vision.config import VisionConfig
 from app.vision.desk import DeskMotionAnalyzer
 from app.vision.detector import YOLOAdapter
-from app.vision.evidence import EventReplay, ReplayFrame, frame_fingerprint, select_temporal_frames
+from app.vision.evidence import (
+    EventReplay,
+    ReplayFrame,
+    TemporalSelection,
+    frame_fingerprint,
+    prioritize_temporal_selections,
+    select_temporal_frames,
+)
 from app.vision.reflection import ReflectionGuard
 from app.vision.result import Coverage, Diagnostic, EvidenceFrame, VisionAnalysisResult
 from app.vision.roi import load_rois
@@ -245,6 +252,7 @@ def analyze_temporal(
                     result.coverage.refined_intervals.append((p.start_sec, p.end_sec))
             cv_started = time.perf_counter()
             refined: list[TemporalProposal] = []
+            refinement_config = config.temporal.refinement_config()
             for p in proposals:
                 window_scores = [
                     s
@@ -253,7 +261,7 @@ def analyze_temporal(
                     and s.end_sec <= p.end_sec
                     and s.roi_id == p.roi_id
                 ]
-                local = propose_events(window_scores, config.temporal, p.end_sec)
+                local = propose_events(window_scores, refinement_config, p.end_sec)
                 if local.truncated:
                     diagnose("proposal_limit", "error")
                 if not local.proposals:
@@ -273,10 +281,16 @@ def analyze_temporal(
             result.metrics.refined_candidates = len(refined)
             if len(refined) > config.max_candidates:
                 diagnose("candidate_limit", "error")
-            proposals = refined[: config.max_candidates]
+            prepared = prioritize_temporal_selections(
+                [TemporalSelection(p, *select_temporal_frames(pool, p)) for p in refined]
+            )[: config.max_candidates]
+            proposals = [selection.proposal for selection in prepared]
             checkpoint_events(proposals)
-            for event, replay, p in zip(result.events, result.event_replay, proposals, strict=True):
-                selected, complete = select_temporal_frames(pool, p)
+            for index, (event, replay, selection) in enumerate(
+                zip(result.events, result.event_replay, prepared, strict=True)
+            ):
+                p = selection.proposal
+                selected, complete = selection.frames, selection.temporal_complete
                 crop_roi = next((r for r in rois if r.roi_id == p.roi_id), None)
                 selected = [
                     f.model_copy(
@@ -296,7 +310,7 @@ def analyze_temporal(
                     boundary_activity=any(p.start_sec <= t <= p.end_sec for t in boundary_times),
                 )
                 updated = EventReplay.model_validate(replay_data)
-                result.event_replay[result.events.index(event)] = updated
+                result.event_replay[index] = updated
                 event.frame_paths = [f.path for f in selected]
             result.metrics.cv_sec += time.perf_counter() - cv_started
             publish(True)

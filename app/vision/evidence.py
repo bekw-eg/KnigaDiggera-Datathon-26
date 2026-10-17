@@ -1,6 +1,7 @@
 """Typed replay data and conservative selection of local before/during/after frames."""
 
 import hashlib
+from dataclasses import dataclass
 from typing import Literal
 
 import cv2
@@ -62,6 +63,32 @@ class EventReplay(ContractModel):
         ):
             raise ValueError("incomplete temporal evidence")
         return self
+
+
+@dataclass(frozen=True)
+class TemporalSelection:
+    """Internal selection of validated evidence; no pixels or inference results."""
+
+    proposal: TemporalProposal
+    frames: list[ReplayFrame]
+    temporal_complete: bool
+
+
+def prioritize_temporal_selections(selections: list[TemporalSelection]) -> list[TemporalSelection]:
+    """Spend the VLM/candidate budget on complete evidence before fallback windows.
+
+    Input order already reflects configured ROI priorities and measured motion scores.
+    Stable sorting preserves that order inside each evidence tier; no ROI names are
+    special. Empty selections are last because they cannot be sent to the model.
+    """
+    return sorted(
+        selections,
+        key=lambda s: (
+            not s.temporal_complete,
+            not bool(s.frames),
+            s.proposal.segmentation_insufficient,
+        ),
+    )
 
 
 def frame_fingerprint(image: Image) -> str:

@@ -18,6 +18,8 @@
     "refine_fps": 8,
     "high_threshold": 0.012,
     "low_threshold": 0.003,
+    "refine_high_threshold": null,
+    "refine_low_threshold": null,
     "pause_sec": 0.5,
     "merge_gap_sec": 0.15,
     "max_window_sec": 4,

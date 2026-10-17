@@ -5,7 +5,13 @@ import pytest
 from pydantic import ValidationError
 
 from app.vision.desk import DeskMotionAnalyzer
-from app.vision.evidence import EventReplay, ReplayFrame, select_temporal_frames
+from app.vision.evidence import (
+    EventReplay,
+    ReplayFrame,
+    TemporalSelection,
+    prioritize_temporal_selections,
+    select_temporal_frames,
+)
 from app.vision.motion import MotionConfig, MotionInterval
 from app.vision.roi import ROI
 from app.vision.temporal import (
@@ -205,3 +211,59 @@ def test_roi_overlap_is_exact_for_thin_nested_and_concave_regions():
     )
     nested = ROI(roi_id="inside", polygon=[(0.4, 0.4), (0.8, 0.4), (0.8, 0.8), (0.4, 0.8)])
     assert not concave.overlaps(nested)
+
+
+def test_evidence_tiers_keep_roi_order_but_put_complete_triplets_ahead_of_high_scores():
+    def selection(name, score, complete=False, insufficient=False, empty=False):
+        proposal = TemporalProposal(
+            start_sec=0,
+            end_sec=2,
+            activity_start_sec=0.5,
+            activity_end_sec=1.5,
+            peak_sec=1,
+            motion_score=score,
+            roi_id=name,
+            segmentation_insufficient=insufficient,
+        )
+        frames = [] if empty else [evidence(t) for t in ([0, 1, 2] if complete else [1])]
+        return TemporalSelection(proposal, frames, complete)
+
+    # Order within a tier came from configured priorities, not alphabetical ROI names.
+    selections = [
+        selection("first-empty", 1, empty=True),
+        selection("second-undersegmented", 0.98, insufficient=True),
+        selection("third-fallback", 0.9),
+        selection("custom-priority", 0.02, True),
+        selection("higher-score", 0.8, True),
+    ]
+    ordered = prioritize_temporal_selections(selections)
+    assert [s.proposal.roi_id for s in ordered] == [
+        "custom-priority",
+        "higher-score",
+        "third-fallback",
+        "second-undersegmented",
+        "first-empty",
+    ]
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"refine_high_threshold": float("nan")},
+        {"refine_low_threshold": float("inf")},
+        {"refine_high_threshold": 0},
+        {"refine_low_threshold": -1},
+        {"refine_high_threshold": 0.001},
+        {"refine_low_threshold": 0.02},
+        {"refine_high_threshold": 0.004, "refine_low_threshold": 0.005},
+    ],
+)
+def test_invalid_refinement_thresholds_are_rejected(overrides):
+    with pytest.raises(ValidationError):
+        TemporalConfig(**overrides)
+
+
+def test_default_refinement_thresholds_inherit_overview_without_auto_scaling():
+    config = TemporalConfig(high_threshold=0.04, low_threshold=0.01, refine_fps=16)
+    refined = config.refinement_config()
+    assert refined.high_threshold == 0.04 and refined.low_threshold == 0.01

@@ -27,6 +27,8 @@ class TemporalConfig(ContractModel):
     refine_fps: float = Field(default=8, gt=0, le=30)
     high_threshold: float = Field(default=0.012, gt=0, le=1)
     low_threshold: float = Field(default=0.003, gt=0, le=1)
+    refine_high_threshold: float | None = Field(default=None, gt=0, le=1)
+    refine_low_threshold: float | None = Field(default=None, gt=0, le=1)
     pause_sec: float = Field(default=0.5, gt=0, le=10)
     merge_gap_sec: Seconds = 0.15
     max_window_sec: float = Field(default=4, gt=0, le=20)
@@ -43,11 +45,38 @@ class TemporalConfig(ContractModel):
     def valid_thresholds(self) -> "TemporalConfig":
         if self.low_threshold > self.high_threshold:
             raise ValueError("low threshold exceeds high threshold")
+        if (
+            self.refine_low_threshold
+            if self.refine_low_threshold is not None
+            else self.low_threshold
+        ) > (
+            self.refine_high_threshold
+            if self.refine_high_threshold is not None
+            else self.high_threshold
+        ):
+            raise ValueError("refinement low threshold exceeds refinement high threshold")
         if self.pre_roll_sec + self.post_roll_sec >= self.max_window_sec:
             raise ValueError("rolls must leave room for activity")
         if self.merge_gap_sec >= self.pause_sec:
             raise ValueError("merge gap must be shorter than a separating pause")
         return self
+
+    def refinement_config(self) -> "TemporalConfig":
+        """Resolve optional second-pass thresholds; never auto-scale scores by FPS."""
+        return self.model_copy(
+            update={
+                "high_threshold": (
+                    self.refine_high_threshold
+                    if self.refine_high_threshold is not None
+                    else self.high_threshold
+                ),
+                "low_threshold": (
+                    self.refine_low_threshold
+                    if self.refine_low_threshold is not None
+                    else self.low_threshold
+                ),
+            }
+        )
 
 
 class TemporalProposal(ContractModel):

@@ -143,6 +143,10 @@ activity is marked undersegmented. Deduplication preserves ROI provenance and
 configurable priority. A second sequential PTS-validated pass samples selected
 windows more densely, resegments, and selects observed quiet-before/peak/quiet-after
 frames. Distinct fingerprints and increasing PTS are required for complete triplets.
+Before the final refined-candidate cap and inference, a stable evidence-quality
+queue puts complete triplets ahead of incomplete/undersegmented fallbacks; existing
+ROI/score ordering is retained inside each tier. Optional refinement high/low
+thresholds inherit overview thresholds when null, with no automatic FPS scaling.
 
 EventReplay contains event linkage, all source ROI IDs, technical status, full-frame
 JPEG/PTS/role records, crop polygon/context/size mapping, sent VLM paths and sanitized

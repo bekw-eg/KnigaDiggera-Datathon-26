@@ -105,6 +105,10 @@ before/during/after → до трёх кадров в Qwen (`num_ctx=4096`, `num
 ReflectionGuard. По умолчанию старый `VisionConfig()` остаётся single-frame.
 Непрерывное движение получает ограниченные окна с диагностикой недостаточной
 сегментации. `CandidateEvent` не меняется; данные для UI находятся в `event_replay`.
+Полные triplet получают VLM-бюджет раньше одиночных fallback. CLI отдельно показывает
+число доступных triplet, triplet-попыток VLM и single-frame fallback. Пороги второго
+прохода можно задать через `refine_high_threshold` / `refine_low_threshold`;
+по умолчанию они наследуют обзорные значения.
 Настройка Desk/границы, поля Replay, статусы и ограничения описаны в
 [temporal guide](docs/temporal.md); измеренное сравнение — в [benchmark](docs/benchmark.md).
 

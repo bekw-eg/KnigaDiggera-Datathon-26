@@ -322,3 +322,46 @@ def test_previous_result_envelope_and_candidate_contract_remain_readable():
     result = VisionAnalysisResult.model_validate(previous)
     assert result.event_replay == [] and result.metrics.second_pass_frames == 0
     assert result.events[0].model_dump(mode="json") == previous["events"][0]
+
+
+def test_complete_triplet_wins_last_vlm_slot_over_stronger_incomplete_window(
+    tmp_path, sdk, monkeypatch
+):
+    import app.vision.temporal_pipeline as pipeline
+
+    original = pipeline.select_temporal_frames
+
+    def missing_context(frames, proposal):
+        selected, complete = original(frames, proposal)
+        if proposal.peak_sec < 3:
+            return [f for f in selected if f.role == "during"], False
+        return selected, complete
+
+    monkeypatch.setattr(pipeline, "select_temporal_frames", missing_context)
+    result = run(scene(tmp_path / "actions.mov"), configuration(tmp_path, max_vlm_calls=1), sdk)
+    assert result.status == "partial" and result.metrics.vlm_calls == 1
+    complete = [r for r in result.event_replay if r.temporal_complete]
+    fallback = [r for r in result.event_replay if not r.temporal_complete]
+    assert len(complete) == len(fallback) == 1
+    assert complete[0].status == "verified" and len(complete[0].vlm_frame_paths) == 3
+    assert fallback[0].status == "skipped_budget" and not fallback[0].vlm_frame_paths
+    assert len(sdk.calls[0]["messages"][1]["images"]) == 3
+    assert [e.event_id for e in result.events] == [r.event_id for r in result.event_replay]
+
+
+def test_independent_refinement_threshold_recovers_dense_motion_without_changing_overview(
+    tmp_path, sdk
+):
+    path = scene(tmp_path / "actions.mov")
+    config = configuration(tmp_path)
+    config.temporal.high_threshold = 0.05
+    inherited = run(path, config, sdk)
+    assert inherited.metrics.candidates_after_dedup == 2
+    assert not any(r.temporal_complete for r in inherited.event_replay)
+    assert "refinement_no_activity" in {d.code for d in inherited.diagnostics}
+    config.temporal.refine_high_threshold = 0.012
+    refined = run(path, config, sdk)
+    assert refined.metrics.candidates_after_dedup == inherited.metrics.candidates_after_dedup
+    assert refined.status == "complete" and all(r.temporal_complete for r in refined.event_replay)
+    assert config.temporal.high_threshold == 0.05
+    assert "refinement_no_activity" not in {d.code for d in refined.diagnostics}
