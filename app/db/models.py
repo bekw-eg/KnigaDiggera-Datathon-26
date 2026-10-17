@@ -90,10 +90,14 @@ class JobResultResponse(BaseModel):
 # ── Request schemas ─────────────────────────────────────────────────
 
 class JobCreateRequest(BaseModel):
-    """Тело запроса на создание задачи (если видео отправляется по URL)."""
+    """Тело запроса на создание задачи (по пути или URL)."""
     video_url: str | None = Field(
         None,
-        description="URL видеофайла для скачивания",
+        description="URL видеофайла для анализа",
+    )
+    video_path: str | None = Field(
+        None,
+        description="Локальный путь к видеофайлу на сервере",
     )
 
 

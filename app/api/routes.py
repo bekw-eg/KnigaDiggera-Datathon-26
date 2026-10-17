@@ -79,7 +79,7 @@ async def create_job_from_url(
     payload: JobCreateRequest,
 ) -> JobStatusResponse:
     """Создает задачу на анализ видео по указанному video_url."""
-    video_target = payload.video_url or "unknown_source.mov"
+    video_target = payload.video_path or payload.video_url or "unknown_source.mov"
     job_record = await create_job(video_path=video_target)
     job_id = job_record["job_id"]
     
