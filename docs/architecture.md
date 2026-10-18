@@ -166,6 +166,18 @@ with successful model responses; it is never action recall. See [temporal guide]
 for parameters, replay fields, sampling gaps, diagnostics and PowerShell commands.
 Implementation is stacked on PR #2 (`feature/roi-calibration`), which depends on PR #1.
 
+## Local UI redesign (explicit user-authorized scope)
+
+The UI stays under participant 1's existing `app/ui` and Streamlit entry point.
+One local component replaces the old interface; no second frontend server or
+backend contract is introduced. Shared CandidateEvent/VerifiedEvent, ML/CV, rules,
+API and worker are unchanged. A UI-only ReviewReport wrapper accepts the existing
+VisionAnalysisResult plus optional linked VerifiedEvent outputs. This proposes no
+change to the shared contract. See [UI guide](ui.md) for the live endpoint mapping,
+missing telemetry/coverage/legal metadata, source identity checks and disabled ROI
+overlay. Future API enrichment belongs to the backend owner and requires explicit
+contract agreement; the UI must not infer or invent those fields.
+
 ## References used for implementation
 
 - [PyAV time and PTS](https://pyav.org/docs/stable/api/time.html)

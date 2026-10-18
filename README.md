@@ -3,7 +3,27 @@
 Локальный ML/CV-модуль участника №2: MOV → реальные PTS → sampling → движение →
 визуальные наблюдения Ollama → CandidateEvent с путями к JPEG-доказательствам.
 Юридические решения принимает отдельный Rule Engine. Здесь нет распознавания лиц,
-идентификации личности, облачных AI API, backend, базы данных и UI.
+идентификации личности и облачных AI API. В репозитории также интегрированы локальный
+FastAPI backend и Streamlit UI; их интерфейсы отделены от ML/CV.
+
+## Banking Intelligence UI
+
+Новый интерфейс использует существующий Streamlit-вход: Video Analysis, Evidence,
+Events, Legal Verification, Overview, Reports и Settings. Тёмная/светлая тема,
+локальный видеоплеер, переходы по таймкодам, исходные кадры и адаптивная навигация.
+По умолчанию включён явно обозначенный Demo Mode с синтетическими метаданными.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[dev,backend,ui]"
+.\.venv\Scripts\python.exe -m streamlit run app/ui/main.py --server.address 127.0.0.1 --browser.gatherUsageStats false
+```
+
+Откройте `http://127.0.0.1:8501`. Подключение существующего API, импорт отчётов,
+проверки и точные ограничения контракта описаны в [UI guide](docs/ui.md).
+API пока не отдаёт Replay, полноту анализа, нормативные источники и статусы этапов;
+UI не восстанавливает их по догадке. Для подробного просмотра импортируйте локальный
+JSON pipeline и выберите исходное видео/кадры. `verified` Replay не равен юридическому
+`confirmed`; отсутствие событий не означает отсутствие нарушений.
 
 Лучше вернуть `unknown`, чем придумать нарушение. Даже успешный технический запуск
 не подтверждает точность модели или соблюдение банковских правил.
@@ -305,8 +325,8 @@ app/
     video.py roi.py motion.py detector.py reflection.py vlm.py
     config.py result.py pipeline.py
     desk.py temporal.py evidence.py temporal_pipeline.py
-  api/ core/ ui/           # только точки расширения участника №1
-  rules/                   # только точка расширения участника №3
+  api/ core/ ui/           # backend и локальный Streamlit workspace участника №1
+  rules/                   # отдельный Rule Engine участника №3
 configs/                   # пример профиля и неактивная demo ROI
 scripts/                   # smoke test, benchmark и локальная калибровка ROI
 tests/                     # synthetic unit + opt-in integration
