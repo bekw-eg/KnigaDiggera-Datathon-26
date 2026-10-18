@@ -18,6 +18,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<10", "ruff>=0.12,<1"]
+ui = ["streamlit>=1.32,<2"]
 backend = [
   "fastapi>=0.110.0",
   "uvicorn[standard]>=0.28.0",
@@ -28,6 +29,9 @@ yolo = ["ultralytics>=8.3,<9"]
 
 [tool.setuptools.packages.find]
 include = ["app*", "scripts*"]
+
+[tool.setuptools.package-data]
+"app.ui" = ["frontend/*.html", "frontend/*.js", "frontend/*.css", "frontend/assets/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

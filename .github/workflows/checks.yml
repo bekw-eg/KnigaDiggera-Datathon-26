@@ -9,6 +9,15 @@ concurrency:
 permissions:
   contents: read
 jobs:
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - run: node --test tests/ui.test.mjs
+      - run: npm --prefix app/ui/frontend run check
   unit:
     runs-on: ${{ matrix.os }}
     strategy:

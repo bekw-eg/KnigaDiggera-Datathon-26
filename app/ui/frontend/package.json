@@ -1,0 +1,8 @@
+{
+  "name": "banking-intelligence-component",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check app.js && node --check components.js && node --check api.js && node --check data.js"
+  }
+}
